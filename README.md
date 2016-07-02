@@ -9,41 +9,83 @@ __基于^4.1.0版本__
 
 ##Creating Observables
 
-####Rx.Observable.amb(x::steam,y::steam)
+####Rx.Observable.create(f())
 
-**优先选择有返回值的流**
+**创建一个自定义的流,返回值(return)为缺省,可以是一个函数或者一个Disposable.函数回调参数obs有3个方法onNext,onError和onCompleted**
 
 ```javascript
-let source = Rx.Observable.amb(
-    Rx.Observable.fromEvent(Button, 'click').map(() => 'one'),
-    Rx.Observable.fromEvent(Button2, 'click').map(() => 'two')
-);
-let subscription = source.subscribe(
+let source = Rx.Observable.create((obs) => {
+    obs.onNext(42);
+    obs.onCompleted();
+    // return ()=>{}
+    return Rx.Disposable.create(()=>{
+        console.log('fin');
+    })
+}).subscribe(
     (x) => {
-        console.log(x);//先点击button则只会输出one
+        console.log(x);
+    }
+);
+```
+---
+####Rx.Observable.generate(iterate,f(x),f(x),f(x))
+
+**创建一个generate的流,第一个参数为初始值,第二个参数为判断条件,第三个参数为当前item的操作,第四个参数为返回**
+
+```javascript
+var source = Rx.Observable.generate(
+    4,
+    function (x) { return x < 7; },
+    function (x) { return x + 1; },
+    function (x) { return x; }
+)
+.subscribe(
+    (x) => {
+        console.log(x);   //4, 5, 6 
     }
 );
 ```
 ---
 
-##
+####Rx.Observable.defer(f())
 
-####Rx.Observable.amb(x::steam,y::steam)
+**需要在回调函数里面返回一个流,在defer里面的方法会在subscribe之后定义**
 
-**优先选择有返回值的流**
-
-```javascript
-let source = Rx.Observable.amb(
-    Rx.Observable.fromEvent(Button, 'click').map(() => 'one'),
-    Rx.Observable.fromEvent(Button2, 'click').map(() => 'two')
-);
-let subscription = source.subscribe(
+```JavaScript 
+console.log(1);
+var source = Rx.Observable.defer(() => {
+    console.log(2);
+    return Rx.Observable.return('boom');
+});
+console.log(3);
+let go = source.subscribe(
     (x) => {
-        console.log(x);//先点击button则只会输出one
+        console.log(4);
+        console.log(x);
+    }
+);
+console.log(5);       //顺序 1,3,2,4,boom,5
+```
+---
+
+####Rx.Observable.if(f():true|flase,x::steam[,y::steam])
+
+**第一个参数函数返回判断条件,根据前面的返回,判断是执行后面的哪个流,true=>x(),false=>y()**
+
+```JavaScript 
+let _b = true;
+let source = Rx.Observable.if(
+    function () { return _b; },
+    Rx.Observable.return('对的'),
+    Rx.Observable.return('错了')
+).subscribe(
+    (x) => {
+        console.log(x);  //对的
     }
 );
 ```
 ---
+
 ####Rx.Observable.case(f(name),sources::{steam}[,Defaults::Rx.Observable.empty()])
 
 **选择流对象里面对应的流**
@@ -61,6 +103,72 @@ subscription.subscribe(function (x) {
 });
 ```
 ---
+
+####Rx.Observable.empty()
+**创建一个空的流,但是会正常结束**
+
+####Rx.Observable.never()
+**创建一个空的流,但是不会结束**
+
+####Rx.Observable.throw(error::object)
+
+**创建一个错误流,传入的参数必须输Error类**
+
+```JavaScript 
+let empty = Rx.Observable.empty().subscribe(
+    (x) => {
+        console.log(x);
+    }
+);
+let never = Rx.Observable.never().subscribe(
+    (x) => {
+        console.log(x);
+    }
+);
+let throwError = Rx.Observable.return(42)
+    .selectMany(
+        Rx.Observable.throw(new Error('error!'))
+    )
+    .subscribe(
+   	 	(x) => {
+       	console.log(x);
+    	}
+    );
+```
+
+##From Observables
+
+####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
+**遍历参数所有项**
+
+```JavaScript
+Rx.Observable.from({length:5},(x,y)=>{return y; }).subscribe(
+    (x)=>{
+        console.log(x); //0,1,2,3,4
+    }
+)
+```
+
+##fuck Observables
+
+
+####Rx.Observable.amb(x::steam,y::steam)
+
+**优先选择有返回值的流**
+
+```javascript
+let source = Rx.Observable.amb(
+    Rx.Observable.fromEvent(Button, 'click').map(() => 'one'),
+    Rx.Observable.fromEvent(Button2, 'click').map(() => 'two')
+);
+let subscription = source.subscribe(
+    (x) => {
+        console.log(x);//先点击button则只会输出one
+    }
+);
+```
+---
+
 ####Rx.Observable.combineLatest(x::steam,y::steam,f(xv,yv))
     
 **返回2个流各自最新的值(流有返回的时候触发,第一次必须2个流都有返回)**
