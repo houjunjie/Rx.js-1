@@ -140,6 +140,8 @@ let throwError = Rx.Observable.return(42)
 
 ####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
 **遍历参数所有项**
+####Rx.Observable.of(x[,y[,z]])
+**遍历参数所有项**
 
 ```JavaScript
 Rx.Observable.from({length:5},(x,y)=>{return y; }).subscribe(
@@ -147,8 +149,72 @@ Rx.Observable.from({length:5},(x,y)=>{return y; }).subscribe(
         console.log(x); //0,1,2,3,4
     }
 )
-```
 
+Rx.Observable.of(1,2,3).subscribe(
+    (x)=>{
+        console.log(x); //1,2,3
+    }
+)
+```
+---
+####Rx.Observable.fromCallback(f())
+####Rx.Observable.fromNodeCallback(f())[针对NODE]
+**传入触发函数,调用回调函数,感觉有点像切面编程,可以随时在任何地方添加回调**
+
+```JavaScript
+var fs = require('fs'),
+    Rx = require('rx');
+
+// Wrap fs.exists
+var exists = Rx.Observable.fromCallback(fs.exists);
+
+// Check if file.txt exists
+var source = exists('file.txt');
+
+var subscription = source.subscribe(
+    function (x) { console.log('Next: ' + x); },
+    function (err) { console.log('Error: ' + err); },
+    function () { console.log('Completed'); });
+```
+---
+####Rx.Observable.fromEvent(element::DOM,event::string[,f(x)])
+**自定义一个事件流
+element可以是很多类型(a simple DOM element, or a NodeList, jQuery element, Zepto Element, Angular element, Ember.js element, or EventEmitter).
+触发函数的回调参数是事件本身.如果触发函数带参数的话,可以在缺省函数里取到,进行操作**
+
+```JavaScript
+let refreshButton = this.refs['refresh-btn'];   //react的写法,事实上是dom
+Rx.Observable.fromEvent(refreshButton, 'click').subscribe(
+    (x) => {
+        console.log(x);   //x为event点击事件
+    }
+);
+```
+---
+
+####Rx.Observable.ofArrayChanges(x::arr)
+####Rx.Observable.ofObjectChanges(x::obj)
+**监听对象,在改变的时候触发**
+
+```JavaScript
+let arr = [1,2,3];
+let obj = {x: 1};
+
+Rx.Observable.ofArrayChanges(arr).subscribe(
+    (x) => {
+        console.log(x);   //{type: "splice", object: Array[4], index: 3, removed: Array[0], addedCount: 1}
+    }
+);
+Rx.Observable.ofObjectChanges(obj).subscribe(
+    (x) => {
+        console.log(x);   //{type: "update", object: Object, name: "x", oldValue: 1}
+    }
+);
+
+arr.push(4);
+obj.x = 42;
+```
+---
 ##fuck Observables
 
 
