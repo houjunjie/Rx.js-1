@@ -135,7 +135,80 @@ let throwError = Rx.Observable.return(42)
     	}
     );
 ```
+---
+####Rx.Observable.interval(x::Number)
 
+**同setInterval,间隔执行**
+
+```javascript
+let source = Rx.Observable
+            .interval(1000)
+            .subscribe(
+                (x) => { console.log(x); } //0   1    2    3    ...
+            )
+```
+---
+####Rx.Observable.just(x::item)
+
+**同return,直接返回参数,只有触发一次**
+
+```javascript
+let source = Rx.Observable.just(42)
+            .subscribe(
+                (x) => { console.log(x); }  //42
+            )
+            Rx.Observable.just(42).take(3)
+            .subscribe(
+                (x) => { console.log(x); }  //也只会输出一个42
+            )
+```
+---
+####Rx.Observable.range(x,y::Number)
+
+**生成一个连续的流,返回值从x开始,到x+y-1结束,x会执行+1操作,**
+
+```javascript
+Rx.Observable.range(0, 4)
+    .subscribe(
+        (x) => { console.log(x); }  //0 1 2 3
+    )
+Rx.Observable.range('a', 4)
+	.subscribe(
+		(x) => { console.log(x); }  //a0 a1 a2 3
+	)
+```
+---
+####Rx.Observable.repeat(x,y::Number)
+
+**生成y次且返回值有x的流**
+
+```javascript
+Rx.Observable.repeat(42, 3)
+	.subscribe(
+	    (x) => { console.log(x); }  //42 42 42 3次
+	)
+```	
+---
+####Rx.Observable.doWhile(x,y::Number)
+####Rx.Observable.while(true||false,y::stream)
+**类似,只是参数不一样**
+
+```javascript
+let i = 0;
+Rx.Observable.return(42).doWhile(
+    (x)=>{ return ++i < 4; })
+    .subscribe(
+        (x) => { console.log(x); }  //42  42  42  42
+    )
+Rx.Observable.while(
+	   ()=>{ return i++ < 3 },
+	   Rx.Observable.return(42)
+	)
+	.subscribe(
+	    (x) => { console.log(x); }   //42  42   42
+	)
+```	
+---
 ##From Observables
 
 ####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
@@ -215,8 +288,7 @@ arr.push(4);
 obj.x = 42;
 ```
 ---
-##fuck Observables
-
+##Observables
 
 ####Rx.Observable.amb(x::steam,y::steam)
 
