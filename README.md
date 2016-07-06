@@ -148,6 +148,18 @@ let source = Rx.Observable
             )
 ```
 ---
+####Rx.Observable.timer(x::Number[,y::Number])
+
+**延迟执行订阅,第一个参数为延迟的时间,第二个参数的效果与interval类似,为固定间隔触发**
+
+```javascript
+let source = Rx.Observable
+            .timer(2000,1000)
+            .subscribe(
+                (x) => { console.log(x); } //0{2s}   1{3s}    2{4s}    3{5s}    ...
+            )
+```
+---
 ####Rx.Observable.just(x::item)
 
 **同return,直接返回参数,只有触发一次**
