@@ -221,6 +221,88 @@ Rx.Observable.while(
 	)
 ```	
 ---
+##Transforming Observables
+
+####Rx.Observable.XXXXX().map()
+####Rx.Observable.XXXXX().select()
+**同义方法,遍历流的返回**
+
+```javascript
+let md = Rx.Observable.fromEvent(this.refs['refresh-btn'], 'mousedown')
+    .map((x) => {
+        return x;
+    }).subscribe((x) => {
+        console.log(x);  //x为事件
+    });
+
+// Using a function
+let source = Rx.Observable.range(1, 3)
+    .select(function (x, idx, obs) {
+        return x * x;
+    }).subscribe((x) => {
+        console.log(x); //1  4   9
+    });
+```	
+---
+
+####Rx.Observable.XXXXX().pluck()
+**过滤对象,获取对应key的值**
+
+```javascript
+let source = Rx.Observable.fromArray([
+            { value: 0 },
+            { value: 1 },
+            { value: 2 }
+        ])
+            .pluck('value')
+            .subscribe((x) => {
+                console.log(x); //0  1   2
+            });
+```	
+---
+
+####Rx.Observable.XXXXX().scan(f()[,init])
+**和reduce类似,如果init不存在的情况下,并不会触发第一次scan回调**
+
+```javascript
+let source = Rx.Observable.range(1, 3)
+    .scan((pre,nex)=>{
+        console.log(pre,nex); //none    1    3
+        return pre + nex;
+    }).subscribe((x) => {
+        console.log(x); //1  3   6
+    });
+```	
+---
+
+####Rx.Observable.XXXXX().expand(f())
+**和scan类似,不过他是自循环,无限次数**
+
+```javascript
+let source = Rx.Observable.return(34)
+    .expand((pre)=>{
+        return Rx.Observable.return(34+pre);
+    }).take(5).subscribe((x) => {
+        console.log(x); //34  68   102 136   170
+    });
+```	
+---
+##Filtering Observables
+
+####Rx.Observable.XXXXX().debounce(x::Number)
+**过滤间隔时间X内的多个事件,以最后一个为准**
+
+```javascript
+let _time = 0;
+let source = Rx.Observable.fromEvent(this.refs['refresh-btn'],'click',()=>{
+        console.log('click');
+        return ++_time;
+    })
+    .debounce(500).subscribe((x) => {
+        console.log(x);
+    });
+```	
+---
 ##From Observables
 
 ####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
