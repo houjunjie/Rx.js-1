@@ -289,6 +289,74 @@ let source = Rx.Observable.return(34)
 ---
 ##Filtering Observables
 
+####Rx.Observable.XXXXX().take(x::Number)
+**限制流的个数**
+
+```javascript
+Rx.Observable.range(0, 5)
+    .take(3)
+    .subscribe((x) => {
+        console.log(x);  //0 1 2
+    });
+```	
+---
+####Rx.Observable.XXXXX().takeUntilWithTime(x::Number)
+**限定时间外的流**
+
+```javascript
+Rx.Observable.timer(0, 1000)
+    .takeUntilWithTime(4000)
+    .subscribe((x) => {
+        console.log(x);  //0 1 2 3
+    });
+```	
+---
+####Rx.Observable.XXXXX().takeLast(x::Number)
+**只返回倒算的x个流**
+
+```javascript
+Rx.Observable.range(0, 5)
+    .takeLast(3)
+    .subscribe((x) => {
+        console.log(x);  //2  3  4
+    });
+```	
+---
+####Rx.Observable.XXXXX().takeLastWithTime(x::Number)
+**只返回倒算限定时间内的流**
+
+```javascript
+Rx.Observable.time(0,1000)
+	 .take(10)
+    .takeLastWithTime(5000)
+    .subscribe((x) => {
+        console.log(x);  //4 5 6 7 8 9
+    });
+```	
+---
+####Rx.Observable.XXXXX().takeLastBuffer(x::Number)
+**将倒数的x个流合并返回**
+
+```javascript
+Rx.Observable.range(0, 5)
+    .takeLastBuffer(3)
+    .subscribe((x) => {
+        console.log(x); //[2,3,4]
+    });
+```	
+---
+####Rx.Observable.XXXXX().takeLastBufferWithTime(x::Number)
+**将倒数时间x内的流合并返回**
+
+```javascript
+Rx.Observable.timer(0, 400)
+    .take(10)
+    .takeLastBufferWithTime(600)
+    .subscribe((x) => {
+        console.log(x);  //[8,9]
+    });
+```	
+---
 ####Rx.Observable.XXXXX().debounce(x::Number)
 **过滤间隔时间X内的多个事件,以最后一个为准**
 
@@ -303,6 +371,208 @@ let source = Rx.Observable.fromEvent(this.refs['refresh-btn'],'click',()=>{
     });
 ```	
 ---
+####Rx.Observable.XXXXX().distinct([,f()])
+**过滤相同的流**
+
+```javascript
+Rx.Observable.fromArray([
+        {value: 42}, {value: 24}, {value: 42}, {value: 24}
+    ])
+    .distinct(function (x) { return x.value; })
+    .subscribe((x) => {
+        console.log(x);  //42 24
+    });
+```	
+---
+####Rx.Observable.XXXXX().distinctUntilChanged()
+**过滤相同的流,但是只在触发的时候过滤**
+
+```javascript
+Rx.Observable.fromArray([
+        {value: 42}, {value: 24}, {value: 24}, {value: 42}
+    ])
+    . distinctUntilChanged()
+    .subscribe((x) => {
+        console.log(x); //42  24  42
+    });
+```	
+---
+####Rx.Observable.XXXXX().elementAt(x:Number)
+**过滤其他的流,只返回第x个**
+
+```javascript
+Rx.Observable.fromArray([0,1,2,3,4,5,6])
+    .elementAt(3).subscribe((x) => {
+        console.log(x);     //3
+    });
+```	
+---
+####Rx.Observable.XXXXX().filter(f())
+**过滤回调里面返回false的值,保留返回true的,回调里有3个参数,当前值,当前的序列号,流对象自身(filter和where异曲同工,一个尿性)**
+
+```javascript
+Rx.Observable.range(0, 5)
+    .filter((x, idx, obs)=>{
+        return x % 2 === 0;
+    }).subscribe((x) => {
+        console.log(x); // 0  2  4
+    });
+```	
+---
+####Rx.Observable.every(f(x))
+**遍历所有,返回`true`||`false`**
+####Rx.Observable.indeOf(x)
+**与[Array.prototype.indexOf()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf)相同,遍历所有查询,返回`true`||`false`**
+####Rx.Observable. findIndex(f(x))
+**与[Array.prototype.findIndex()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex)相同,查询指定条件元素的索引**
+
+```javascript
+let source = Rx.Observable.of(1, 2, 3, 4, 5)
+    .every(function (x) {
+        return x < 6;
+	 })
+	.subscribe(
+    	(x) => { console.log(x); } //true
+	)
+
+let source = Rx.Observable.of(1,'b','2',4)
+    .indexOf('b')
+    .subscribe(
+        (x) => { console.log(x); //true
+        }
+    );
+    
+    
+let source = Rx.Observable.of(1,'b','2',4)
+    .findIndex((item)=>{
+        return item == 'b';
+    })
+    .subscribe(
+        (x) => { console.log(x);  //1
+        }
+    );
+```
+---
+####Rx.Observable.XXXXX().first(f())
+**以回调断言来筛选,只返回第一个流**
+####Rx.Observable.XXXXX().last(f())
+**以回调断言来筛选,只返回最后个流**
+
+```javascript
+Rx.Observable.range(0, 10)
+    .filter((x, idx, obs)=>{
+        return x % 2 === 0;
+    }).subscribe((x) => {
+        console.log(x); // first:1   last:9
+    });
+```	
+---
+####Rx.Observable.XXXXX().ignoreElements()
+**忽略所有的返回**
+
+```javascript
+Rx.Observable.range(0, 5)
+    .ignoreElements()
+    .subscribe((x) => {
+        console.log(x); //啥都没有
+    });
+```	
+---
+####Rx.Observable.XXXXX().sample(x)
+**间隔x秒返回最新的一个流.与`debounce `的区别在于,`debounce `是每次触发重新计时.这里还有个小坑,x设为5999也是以5秒计算**
+
+```javascript
+Rx.Observable.interval(1000)
+    .sample(5000)
+    .take(2)
+    .subscribe((x) => {
+        console.log(x);  //4   9
+    });
+```	
+---
+####Rx.Observable.XXXXX().skip(x)
+**忽略前面x个流**
+####Rx.Observable.XXXXX().skipLast(x)
+**忽略最后x个流**
+
+```javascript
+Rx.Observable.range(0, 10)
+    .skip(4)
+    .subscribe((x) => {
+        console.log(x);  // 4 5 6 7 8 9
+    });
+    
+Rx.Observable.range(0, 7)
+    .skipLast(3)
+    .subscribe((x) => {
+        console.log(x);  // 0 1 2 3
+    });
+```	
+---
+####Rx.Observable.XXXXX().skipUntilWithTime(x)
+**忽略前面x秒的流**
+####Rx.Observable.XXXXX().skipLastWithTime(x)
+**忽略最后x秒的流**
+```javascript
+Rx.Observable.timer(0, 1000)
+    .skipUntilWithTime(4000).subscribe((x) => {
+        console.log(x);  //4 5 6 7 8 9 ...
+    });
+    
+Rx.Observable.timer(0, 1000)
+    .take(10)
+    .skipLastWithTime(5000)
+    .subscribe((x) => {
+        console.log(x); // 0 1 2 3 4
+    });
+```	
+---
+
+##Combining Observables
+
+####Rx.Observable.combineLatest(x::steam,y::steam,f(xv,yv))
+    
+**返回2个流各自最新的值(流有返回的时候触发,第一次必须2个流都有返回)**
+
+```javascript
+let num = ["1", "2", "3"];
+let string = ["a", "b", "c", "d", "e", "f"];
+let source1 = Rx.Observable.interval(2000) //延迟2s
+    .map(() => num.pop());
+let source2 = Rx.Observable.interval(1000) //延迟1s
+    .map(() => string.pop());
+
+let combined = Rx.Observable.combineLatest(source1, source2, function (x, y) {
+    return x + "-" + y;
+}).take(8);//执行8次
+
+combined.subscribe((comb) => console.log(comb));
+//3-f 3-e 3-d 2-d 2-c 2-b 1-b 1-a
+```
+---
+####y::steam.withLatestFrom(x::steam,f(xv,yv))
+    
+**当每次x流有返回值的时候,就是返回x流的当前值和y流的最后的返回值**
+
+```javascript
+let source1 = Rx.Observable.interval(140)
+    .map(function (i) { return 'First: ' + i; });
+
+let source2 = Rx.Observable.interval(50)
+    .map(function (i) { return 'Second: ' + i; });
+
+let source = source1.withLatestFrom(
+    source2,
+    function (s1, s2) { return s1 + ', ' + s2; }
+).take(4).subscribe((x) => {
+        console.log(x);   //First: 0, Second: 1
+                          //First: 1, Second: 4
+                          //First: 2, Second: 7
+                          //First: 3, Second: 10
+    });
+```
+---
+
 ##From Observables
 
 ####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
@@ -401,26 +671,6 @@ let subscription = source.subscribe(
 ```
 ---
 
-####Rx.Observable.combineLatest(x::steam,y::steam,f(xv,yv))
-    
-**返回2个流各自最新的值(流有返回的时候触发,第一次必须2个流都有返回)**
-
-```javascript
-let num = ["1", "2", "3"];
-let string = ["a", "b", "c", "d", "e", "f"];
-let source1 = Rx.Observable.interval(2000) //延迟2s
-    .map(() => num.pop());
-let source2 = Rx.Observable.interval(1000) //延迟1s
-    .map(() => string.pop());
-
-let combined = Rx.Observable.combineLatest(source1, source2, function (x, y) {
-    return x + "-" + y;
-}).take(8);//执行8次
-
-combined.subscribe((comb) => console.log(comb));
-//3-f 3-e 3-d 2-d 2-c 2-b 1-b 1-a
-```
----
 ####Rx.Observable.reduce(f(x,y))
     
 **与[Array.prototype.reduce()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)功能一样**
@@ -438,36 +688,4 @@ let source = Rx.Observable.range(0,4).reduce((x,y)=>{
 )
 ```
 ---
-####Rx.Observable.every(f(x))
-**遍历所有,返回`true`||`false`**
-####Rx.Observable.indeOf(x)
-**与[Array.prototype.indexOf()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf)相同,遍历所有查询,返回`true`||`false`**
-####Rx.Observable. findIndex(f(x))
-**与[Array.prototype.findIndex()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex)相同,查询指定条件元素的索引**
 
-```javascript
-let source = Rx.Observable.of(1, 2, 3, 4, 5)
-    .every(function (x) {
-        return x < 6;
-	 })
-	.subscribe(
-    	(x) => { console.log(x); } //true
-	)
-
-let source = Rx.Observable.of(1,'b','2',4)
-    .indexOf('b')
-    .subscribe(
-        (x) => { console.log(x); //true
-        }
-    );
-    
-    
-let source = Rx.Observable.of(1,'b','2',4)
-    .findIndex((item)=>{
-        return item == 'b';
-    })
-    .subscribe(
-        (x) => { console.log(x);  //1
-        }
-    );
-```
