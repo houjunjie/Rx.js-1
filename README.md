@@ -222,7 +222,61 @@ Rx.Observable.while(
 ```	
 ---
 ##Transforming Observables
+####Rx.Observable.XXXXX().selectMany(f())
+**等于可以在流上面做特殊处理,返回一个流||Promise.同flatMap,有缺省的第二个参数函数,接受第一个函数的数组返回,遍历**
 
+```javascript
+Rx.Observable
+    .range(1, 2)
+    .selectMany(function (x) {
+        return Rx.Observable.range(x, 2);
+    }).subscribe((x) => {
+        console.log(x);  //1  2  2  3
+    });
+
+
+//y为第一个函数返回的数组的x与i,所以会返回2次
+Rx.Observable.of(1)
+    .flatMap(
+        function (x, i) {  return [x,i]; },
+        function (x, y, ix, iy) { return x + y + ix + iy; }
+    ).subscribe((x) => {
+        console.log(x);  //2 2
+    });
+```	
+---
+####Rx.Observable.XXXXX().flatMapLatest()
+**过滤流,返回最后一个**
+
+```javascript
+Rx.Observable
+    .range(1, 2)
+    .flatMapLatest(function (x) {
+        return Rx.Observable.range(x, 2);
+    }).subscribe((x) => {
+        console.log(x);    // 1   2   3
+    });
+```	
+---
+####Rx.Observable.XXXXX().flatMapObserver()
+****
+
+```javascript
+Rx.Observable.range(1, 3)
+    .flatMapObserver(
+    function (x, i) {
+        return Rx.Observable.repeat(x, i); // 1,0  2,1  3,2
+    },
+    function (err) {
+        return Rx.Observable.return(42);
+    },
+    function () {
+        return Rx.Observable.empty();
+    }).subscribe((x) => {
+        console.log(x);   //  2 3 3
+    });
+```	
+---
 ####Rx.Observable.XXXXX().map()
 ####Rx.Observable.XXXXX().select()
 **同义方法,遍历流的返回**
