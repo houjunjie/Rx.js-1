@@ -259,7 +259,7 @@ Rx.Observable
 ```	
 ---
 ####Rx.Observable.XXXXX().flatMapObserver()
-****
+**让可以监听状态,去响应onNext,onError,onCompleted**
 
 ```javascript
 Rx.Observable.range(1, 3)
@@ -275,6 +275,47 @@ Rx.Observable.range(1, 3)
     }).subscribe((x) => {
         console.log(x);   //  2 3 3
     });
+```	
+---
+####Rx.Observable.XXXXX().groupBy(f()[,f()[,f()]])
+**意如其名,分类用,第一个函数是用来返回分类的key,第二个函数用来返回返回的值,传说中的第三个,我也不知道干嘛用的.官方文档说是用来比较2各key值,但尝试后无果**
+####Rx.Observable.XXXXX().groupByUntil(f(),f()[,f()[,f()]])
+**触发分类是在接收到信号的时候,前2个函数参数一样,第3个返回有个Observable,对触发点进行控制,第4个依旧是个迷....**
+
+```javascript
+let codes = [
+    { keyCode: 38,tail:1 }, 
+    { keyCode: 38,tail:1 }, 
+    { keyCode: 40,tail:2 },
+    { keyCode: 40,tail:2 },
+    { keyCode: 37,tail:3 },
+    { keyCode: 39,tail:4 },
+    { keyCode: 37,tail:3 },
+    { keyCode: 39,tail:4 }
+];
+
+Rx.Observable.fromArray(codes)
+    .groupBy(
+     (x) => { return x.keyCode; },
+     (x) => { return x.tail; }
+    ).subscribe((x) => {
+        console.log(x);  //  合并后的对象,对象里会有key值
+        x.subscribe(function (x) {
+            console.log(x);  //返回返回值
+        });
+    });
+    
+Rx.Observable
+    .for(codes, function (x) { return Rx.Observable.return(x).delay(1000); })
+    .groupByUntil(
+        function (x) { return x.keyCode; },
+        function (x) { return x.keyCode; },
+        function (x) { return Rx.Observable.timer(2000); })    
+	 .subscribe((x) => {
+         x.subscribe(function (x) {
+             console.log(x);
+         });
+     });
 ```	
 ---
 ####Rx.Observable.XXXXX().map()
@@ -412,6 +453,20 @@ Rx.Observable.timer(0, 400)
 ```	
 ---
 ####Rx.Observable.XXXXX().debounce(x::Number)
+**过滤间隔时间X内的多个事件,以最后一个为准**
+
+```javascript
+let _time = 0;
+let source = Rx.Observable.fromEvent(this.refs['refresh-btn'],'click',()=>{
+        console.log('click');
+        return ++_time;
+    })
+    .debounce(500).subscribe((x) => {
+        console.log(x);
+    });
+```	
+---
+####Rx.Observable.XXXXX(). throttleWithSelector(x::Number)
 **过滤间隔时间X内的多个事件,以最后一个为准**
 
 ```javascript
@@ -626,7 +681,26 @@ let source = source1.withLatestFrom(
     });
 ```
 ---
+####Rx.Observable.join(x::steam,f(),f(),f())
 
+**合并2个流,触发返回是在x(ys)流返回的时候,第一个函数参数和第二个的返回值是对应2个流的生存周期**
+
+```javascript
+let xs = Rx.Observable.interval(1000)
+    .map(function (x) { return x; });
+let ys = Rx.Observable.interval(1000)
+    .map(function (x) { return x; });
+xs.join(
+    ys,
+    function () { return Rx.Observable.timer(0); },
+    function () { return Rx.Observable.timer(0); },
+    function (x, y) { return x +':'+ y; }
+    )
+    .take(5).subscribe((x) => {
+        console.log(x); //0:0  1:1 2:2 3:3 4:4 
+    });
+```
+---
 ##From Observables
 
 ####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
