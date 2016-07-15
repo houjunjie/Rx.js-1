@@ -722,6 +722,28 @@ Rx.Observable.of(1,2,3).subscribe(
 )
 ```
 ---
+####Rx.Observable.startWith(x)
+
+**初始化的时候触发下流**
+
+```javascript
+Rx.Observable.interval(1000).startWith(10).subscribe(
+    (x) => console.log(x)  //10 0 1 2 3 4 5 ...
+)
+```
+---
+####Rx.Observable.switch()
+
+**合并多个流的返回,返回值为最新返回的准**
+
+```javascript
+Rx.Observable.range(0, 3)
+    .select(function (x) { return Rx.Observable.range(x, 5); })
+    .switch().subscribe(
+        (x) => console.log(x)  // 0 1 2 3 4 5 6
+    )
+```
+---
 ####Rx.Observable.fromCallback(f())
 ####Rx.Observable.fromNodeCallback(f())[针对NODE]
 **传入触发函数,调用回调函数,感觉有点像切面编程,可以随时在任何地方添加回调**
