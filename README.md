@@ -701,25 +701,16 @@ xs.join(
     });
 ```
 ---
-##From Observables
+####Rx.Observable.merge(x::steam,y::stream)
+####Rx.Observable.mergeDelayError(x::steam,y::stream)
+**合并2个流,按返回顺序返回,会在遇到错误的时候终端,mergeDelayError会延迟错误**
 
-####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
-**遍历参数所有项**
-####Rx.Observable.of(x[,y[,z]])
-**遍历参数所有项**
-
-```JavaScript
-Rx.Observable.from({length:5},(x,y)=>{return y; }).subscribe(
-    (x)=>{
-        console.log(x); //0,1,2,3,4
-    }
-)
-
-Rx.Observable.of(1,2,3).subscribe(
-    (x)=>{
-        console.log(x); //1,2,3
-    }
-)
+```javascript
+let x = Rx.Observable.timer(0,1000).take(2),
+    y = Rx.Observable.timer(0,100).take(10);
+Rx.Observable.merge(x,y).subscribe(
+        (x) => console.log(x) // 0,0 1 2 3 4 5 6 7 8 1 9
+    )
 ```
 ---
 ####Rx.Observable.startWith(x)
@@ -744,6 +735,88 @@ Rx.Observable.range(0, 3)
     )
 ```
 ---
+####Rx.Observable.zip(x::stream[,x::stream],f(x[,x]))
+
+**压缩N个流的返回,并不会返回最新的值,而是根据返回的次数来压缩返回值**
+
+```javascript
+let x = Rx.Observable.timer(0, 100).take(10),
+    y = Rx.Observable.timer(0, 2000).take(10),
+    z = Rx.Observable.timer(0, 300).take(10);
+
+Rx.Observable.zip(
+    x,
+    y,
+    z,
+    function (s1, s2, s3) {
+        return s1 + ':' + s2 + ':' + s3;
+    }
+).subscribe(
+    (x) => console.log(x) // n:n:n 每2秒递增1
+    )
+```
+---
+####Rx.Observable.forkJoin(x::stream[,x::stream])
+**forkJoin形态一:多个流取最后一个返回值,返回为数组**
+####X::stream.forkJoin(x::stream[,x::stream],f(x))
+**forkJoin形态二:其中一个流为调用者,最后多一个回调函数处理返回值**
+
+```javascript
+Rx.Observable.forkJoin(
+    Rx.Observable.timer(0,2000).take(2),
+    Rx.Observable.range(0, 10),
+    Rx.Observable.fromArray([1, 2, 3, 4])
+).subscribe(
+    (x) => console.log(x)  //[1,9,4]
+    )
+    
+    
+Rx.Observable.timer(0,2000).take(2).forkJoin(
+    Rx.Observable.fromArray([1, 2, 3, 4]),
+    (x,y)=> {
+        return x+y;
+    }
+).subscribe(
+    (x) => console.log(x)  //5  (1+4)
+    )
+```
+---
+##Observable Utility Operators
+####Rx.Observable.XXXXX().delay(new Date(Date.now() + n))
+**延迟返回值**
+####Rx.Observable.XXXXX().delaySubscription(time)
+**与delay基本一致,但会在触发返回的时间间隔与time直接取最大值**
+
+```javascript
+Rx.Observable.just(1).delay(3000).subscribe(
+		(x) => console.log(x)  //3s后输出  1
+)
+```	
+---
+
+##From Observables
+
+####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
+**遍历参数所有项**
+####Rx.Observable.of(x[,y[,z]])
+**遍历参数所有项**
+
+```JavaScript
+Rx.Observable.from({length:5},(x,y)=>{return y; }).subscribe(
+    (x)=>{
+        console.log(x); //0,1,2,3,4
+    }
+)
+
+Rx.Observable.of(1,2,3).subscribe(
+    (x)=>{
+        console.log(x); //1,2,3
+    }
+)
+```
+---
+
+
 ####Rx.Observable.fromCallback(f())
 ####Rx.Observable.fromNodeCallback(f())[针对NODE]
 **传入触发函数,调用回调函数,感觉有点像切面编程,可以随时在任何地方添加回调**
