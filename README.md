@@ -794,6 +794,74 @@ Rx.Observable.just(1).delay(3000).subscribe(
 ```	
 ---
 
+####Rx.Observable.XXXXX().do(f(),f(),f())
+**会在每个返回值调用do的参数函数,do也可以传一个Observable的对象**
+
+**同名tap,以下do的都有同名tapxxx的方法**
+
+```javascript
+Rx.Observable.range(0, 3)
+    .do(
+        function (x) { console.log('do:', x); },
+        function (err) { console.log('Do Error:', err); },
+        function () { console.log('Do Completed'); }
+    ).subscribe(
+        (x) => console.log(x)  //do:0  0  do:1  1  do:2  2
+    )
+```	
+---
+
+####Rx.Observable.XXXXX().doOnNext(f(),x::object)
+**会把第二个参数x当做调用者,去调用f()**
+
+```javascript
+Rx.Observable.range(0, 3)
+    .doOnNext(
+        function (x) { this.log('do:'+ x); },
+        console
+    ).subscribe(
+        (x) => console.log(x)  //do:0  0  do:1  1  do:2  2
+    )
+```	
+---
+
+####Rx.Observable.XXXXX().doOnError(f(),x::object)
+**会把第二个参数x当做调用者,去调用f(),捕获异常时,返回**
+####Rx.Observable.XXXXX().doOnCompleted(f(),x::object)
+**会把第二个参数x当做调用者,去调用f(),完成所有返回时,返回**
+####Rx.Observable.XXXXX().finally(f())
+**会把第二个参数x当做调用者,去调用f(),最后的时候返回,在error之后**
+
+```javascript
+Rx.Observable.throw(new Error())
+    .doOnError(function (x) {
+        this.log(x);
+    },console).subscribe(
+        (x) => console.log(x),
+        (err)=>{ console.log('Error: ' + err); },
+        ()=>{ console.log('Completed'); }
+    )
+    
+Rx.Observable.throw(new Error())
+    .finally(function () {
+        console.log('Finally');
+    }).subscribe(
+        (x) => console.log(x),
+        (err)=>{ console.log('Error: ' + err); },
+        ()=>{ console.log('Completed'); }
+    )
+    
+Rx.Observable.range(0,3)
+    .doOnCompleted(function () {
+        this.log('do');
+    },console).subscribe(
+        (x) => console.log(x),     // 0 1  2  do  Completed
+        (err)=>{ console.log('Error: ' + err); },
+        ()=>{ console.log('Completed'); }
+    )
+```	
+---
+
 ##From Observables
 
 ####Rx.Observable.from(string||array||object(.length)||set||map[,selector::function])
