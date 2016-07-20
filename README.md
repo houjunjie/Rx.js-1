@@ -386,6 +386,10 @@ let source = Rx.Observable.return(34)
 
 ####Rx.Observable.XXXXX().take(x::Number)
 **限制流的个数**
+####Rx.Observable.XXXXX().takeUntil(x::stream)
+**x时间之后中断返回**
+####Rx.Observable.XXXXX().takeWhile(f())
+**f返回true之后中断返回**
 
 ```javascript
 Rx.Observable.range(0, 5)
@@ -393,6 +397,14 @@ Rx.Observable.range(0, 5)
     .subscribe((x) => {
         console.log(x);  //0 1 2
     });
+Rx.Observable.timer(0, 1000)
+    .takeUntil(Rx.Observable.timer(5000)).subscribe(
+		(x) => console.log(x)  //  0 1 2 3 4 5
+    )
+Rx.Observable.range(1, 5)
+    .takeWhile(function (x) { return x < 3; }).subscribe(
+    	(x) => console.log(x) // 1 2
+    )
 ```	
 ---
 ####Rx.Observable.XXXXX().takeUntilWithTime(x::Number)
@@ -421,11 +433,11 @@ Rx.Observable.range(0, 5)
 **只返回倒算限定时间内的流**
 
 ```javascript
-Rx.Observable.time(0,1000)
+Rx.Observable.timer(0,1000)
 	 .take(10)
     .takeLastWithTime(5000)
     .subscribe((x) => {
-        console.log(x);  //4 5 6 7 8 9
+        console.log(x);  //5 6 7 8 9
     });
 ```	
 ---
@@ -530,7 +542,7 @@ Rx.Observable.range(0, 5)
 ---
 ####Rx.Observable.every(f(x))
 **遍历所有,返回`true`||`false`**
-####Rx.Observable.indeOf(x)
+####Rx.Observable.indexOf(x)
 **与[Array.prototype.indexOf()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf)相同,遍历所有查询,返回`true`||`false`**
 ####Rx.Observable. findIndex(f(x))
 **与[Array.prototype.findIndex()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex)相同,查询指定条件元素的索引**
@@ -618,11 +630,25 @@ Rx.Observable.range(0, 7)
     });
 ```	
 ---
+####Rx.Observable.XXXXX().skipUntil(x::stream)
+**根据x流返回值,来跳过**
+####Rx.Observable.XXXXX().skipWhile(f())
+**根据x流返回值,当为true时,开始返回**
 ####Rx.Observable.XXXXX().skipUntilWithTime(x)
 **忽略前面x秒的流**
 ####Rx.Observable.XXXXX().skipLastWithTime(x)
 **忽略最后x秒的流**
 ```javascript
+Rx.Observable.timer(0, 1000)
+    .skipUntil(Rx.Observable.timer(5000)).subscribe(
+    	(x) => console.log(x)
+    )
+            
+Rx.Observable.range(1, 5)
+    .skipWhile(function (x) { return x < 3; }).subscribe(
+        (x) => console.log(x)   //3  4  5
+    )
+            
 Rx.Observable.timer(0, 1000)
     .skipUntilWithTime(4000).subscribe((x) => {
         console.log(x);  //4 5 6 7 8 9 ...
@@ -861,6 +887,23 @@ Rx.Observable.range(0,3)
     )
 ```	
 ---
+####Rx.Observable.XXXXX().skipUntilWithTime(x)
+**忽略前面x秒的流**
+
+```javascript
+Rx.Observable.timer(0, 1000)
+    .skipUntilWithTime(4000).subscribe((x) => {
+        console.log(x);  //4 5 6 7 8 9 ...
+    });
+    
+Rx.Observable.timer(0, 1000)
+    .take(10)
+    .skipLastWithTime(5000)
+    .subscribe((x) => {
+        console.log(x); // 0 1 2 3 4
+    });
+```	
+---
 
 ##From Observables
 
@@ -943,7 +986,7 @@ arr.push(4);
 obj.x = 42;
 ```
 ---
-##Observables
+##Conditional and Boolean Operators
 
 ####Rx.Observable.amb(x::steam,y::steam)
 
@@ -961,6 +1004,41 @@ let subscription = source.subscribe(
 );
 ```
 ---
+####Rx.Observable.xxxxx.isEmpty()
+
+**判断流的返回值是否为空**
+
+```javascript
+Rx.Observable.of(1, 2, 3)
+    .isEmpty().subscribe(
+    	(x) => console.log(x)  //false
+    )
+```
+---
+####Rx.Observable.xxxxx.defaultIfEmpty(v)
+
+**为空时的默认值**
+
+```javascript
+Rx.Observable.empty()
+    .defaultIfEmpty(2).subscribe(
+    	(x) => console.log(x)  // 2
+    )
+```
+---
+
+####Rx.Observable.sequenceEqual(x::stream)
+
+**判断2个流的返回值是否相等,包括顺序和数据类型**
+
+```javascript
+let x = Rx.Observable.of(42,1),
+    y = Rx.Observable.of(42,1);
+x.sequenceEqual(y).subscribe(
+    (x) => console.log(x)
+)
+```
+---
 
 ####Rx.Observable.reduce(f(x,y))
     
@@ -976,6 +1054,32 @@ let source = Rx.Observable.range(0,4).reduce((x,y)=>{
     (x)=>{
         console.log('fin:',x);  fin:6
     }
+)
+```
+---
+
+##Mathematical and Aggregate Operators
+
+####Rx.Observable.xxxxx.average()
+    
+**求所有返回值的平均数,可以有一个参数,用来打包处理每一个返回值**
+
+```JavaScript
+Rx.Observable.range(0, 9).average().subscribe(
+    (x) => console.log(x)   // 4(0~8)
+)
+```
+---
+
+####Rx.Observable.concat(x::stream)
+    
+**把x的返回添加到调用者的返回后面**
+
+```JavaScript
+let x = Rx.Observable.of(1,2,3,4).delay(3000),
+    y = Rx.Observable.of(5);
+x.concat(y).subscribe(
+    (x) => console.log(x)   //1 2 3 4 5
 )
 ```
 ---
