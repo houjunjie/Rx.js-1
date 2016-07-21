@@ -1040,24 +1040,6 @@ x.sequenceEqual(y).subscribe(
 ```
 ---
 
-####Rx.Observable.reduce(f(x,y))
-    
-**与[Array.prototype.reduce()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)功能一样**
-
-```JavaScript
-let source = Rx.Observable.range(0,4).reduce((x,y)=>{  
-                         //range:从0开始输出4个数 这里即输出0,1,2,3
-    console.log(x,y);  0,1   1,2   3,3
-    return x+y;         1     3     6
-})
-.subscribe(
-    (x)=>{
-        console.log('fin:',x);  fin:6
-    }
-)
-```
----
-
 ##Mathematical and Aggregate Operators
 
 ####Rx.Observable.xxxxx.average()
@@ -1084,3 +1066,100 @@ x.concat(y).subscribe(
 ```
 ---
 
+####Rx.Observable.xxxx.count(f())
+    
+**根据断言f的返回值,统计个数**
+
+```JavaScript
+Rx.Observable.of(1,2,3,4,5,1,3).count((y)=>{
+    return y < 3;
+}).subscribe(
+    (x) => console.log(x) // 3
+)
+```
+---
+
+####Rx.Observable.xxxx.max()
+**输出最大值**
+####Rx.Observable.xxxx.maxBy(f())
+**断言f处理判断**
+
+####Rx.Observable.xxxx.min()
+####Rx.Observable.xxxx.minBy(f())
+**类同max的用法**
+
+####Rx.Observable.xxxx.sum()
+**类同max的用法**
+
+```JavaScript
+Rx.Observable.of(1,2,3,4,5,1,3).max()
+	.subscribe(
+    	(x) => console.log(x) // 5
+	)
+	
+Rx.Observable.of(1,2,3,4,5,5,3).maxBy((y)=>{
+    return y;
+}).subscribe(
+    (x) => console.log(x)  // [5,5]
+)
+
+Rx.Observable.of(1,2,3,4,5,6,7,8,9).sum().subscribe(
+    (x) => console.log(x)  //  45
+)
+```
+---
+
+
+####Rx.Observable.reduce(f(x,y))
+    
+**与[Array.prototype.reduce()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)功能一样**
+
+```JavaScript
+let source = Rx.Observable.range(0,4).reduce((x,y)=>{  
+                         //range:从0开始输出4个数 这里即输出0,1,2,3
+    console.log(x,y);  0,1   1,2   3,3
+    return x+y;         1     3     6
+})
+.subscribe(
+    (x)=>{
+        console.log('fin:',x);  fin:6
+    }
+)
+```
+---
+
+##Connectable Observable Operators
+
+####Rx.Observable.connect()
+**触发流的返回**
+####Rx.Observable.publish()
+**把普通的对象变成可控的对象**
+####Rx.Observable.publishValue(x)
+**同上,但是x为初始化返回值**
+####Rx.Observable.publishLast()
+**同上,只返回连接后的最后一次**
+####Rx.Observable.publish().refCount()
+**把可控的对象(publish)变回普通的对象**
+
+```JavaScript
+let interval = Rx.Observable.interval(1000);
+
+let source = interval
+    .take(2)
+    .do(function (x) { console.log('Side effect'); });
+
+let published = source.publish();
+
+published.subscribe(createObserver('SourceA'));
+published.subscribe(createObserver('SourceB'));
+    
+function createObserver(tag) {
+    return Rx.Observer.create(
+        function (x) { console.log('Next: ' + tag + x); },
+        function (err) { console.log('Error: ' + err); },
+        function () { console.log('Completed'); });
+}
+// Connect the source
+published.connect();
+```
+---
