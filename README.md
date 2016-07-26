@@ -1141,6 +1141,9 @@ let source = Rx.Observable.range(0,4).reduce((x,y)=>{
 ####Rx.Observable.publish().refCount()
 **把可控的对象(publish)变回普通的对象**
 
+####Rx.Observable.share()
+**等同于执行了publish和refCount**
+
 ```JavaScript
 let interval = Rx.Observable.interval(1000);
 
@@ -1149,9 +1152,12 @@ let source = interval
     .do(function (x) { console.log('Side effect'); });
 
 let published = source.publish();
+let published2 = source.publish().refCount();
+let published3 = source.share();//等同于上行
+
 
 published.subscribe(createObserver('SourceA'));
-published.subscribe(createObserver('SourceB'));
+published2.subscribe(createObserver('SourceB'));//不需要connect
     
 function createObserver(tag) {
     return Rx.Observer.create(
