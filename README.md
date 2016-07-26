@@ -1133,7 +1133,7 @@ let source = Rx.Observable.range(0,4).reduce((x,y)=>{
 ####Rx.Observable.connect()
 **触发流的返回**
 ####Rx.Observable.publish()
-**把普通的对象变成可控的对象**
+**把普通的对象变成可控的对象,要在connect之后,才能触发返回**
 ####Rx.Observable.publishValue(x)
 **同上,但是x为初始化返回值**
 ####Rx.Observable.publishLast()
