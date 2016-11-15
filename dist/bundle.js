@@ -18,4 +18,23 @@ function __async(g) {
   });
 }
 
+// console.log(a,b,c);
+
+function d() {
+    var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+    var f = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
+
+    console.log(1);
+    return new Promise(function (resolve) {
+        setTimeout(function () {
+            resolve(7);
+        }, 3000);
+    }).then(function (res) {
+        return res;
+    });
+}
+
+
+// console.log(cc);
+
 })));
