@@ -1,4 +1,18 @@
 {
-    "presets": ["es2015-rollup"],
-    "plugins": ["syntax-async-functions"]
+    "presets": [
+        "react",
+        [
+            "latest",
+            {
+                "es2015": {
+                    "modules": false
+                }
+            }
+        ],
+        "flow"
+    ],
+    "plugins": [
+        "transform-runtime",
+        "transform-class-properties"
+    ]
 }
