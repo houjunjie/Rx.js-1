@@ -1,4 +1,5 @@
-# Rx.js 
+# 基于5.3.0版本,重新过一遍,结合react开发 (开坑,继续挖)
+# Rx.js
 __基于^4.1.0版本__
 
 [rx-book](http://xgrommx.github.io/rx-book/why_rx.html)
@@ -41,7 +42,7 @@ var source = Rx.Observable.generate(
 )
 .subscribe(
     (x) => {
-        console.log(x);   //4, 5, 6 
+        console.log(x);   //4, 5, 6
     }
 );
 ```
@@ -51,7 +52,7 @@ var source = Rx.Observable.generate(
 
 **需要在回调函数里面返回一个流,在defer里面的方法会在subscribe之后定义**
 
-```JavaScript 
+```JavaScript
 console.log(1);
 var source = Rx.Observable.defer(() => {
     console.log(2);
@@ -72,7 +73,7 @@ console.log(5);       //顺序 1,3,2,4,boom,5
 
 **第一个参数函数返回判断条件,根据前面的返回,判断是执行后面的哪个流,true=>x(),false=>y()**
 
-```JavaScript 
+```JavaScript
 let _b = true;
 let source = Rx.Observable.if(
     function () { return _b; },
@@ -90,7 +91,7 @@ let source = Rx.Observable.if(
 
 **选择流对象里面对应的流**
 
-```JavaScript 
+```JavaScript
 let sources = {
     l3ve: Rx.Observable.just('l3ve'),
     zwei: Rx.Observable.just('zwei')
@@ -114,7 +115,7 @@ subscription.subscribe(function (x) {
 
 **创建一个错误流,传入的参数必须输Error类**
 
-```JavaScript 
+```JavaScript
 let empty = Rx.Observable.empty().subscribe(
     (x) => {
         console.log(x);
@@ -199,7 +200,7 @@ Rx.Observable.repeat(42, 3)
 	.subscribe(
 	    (x) => { console.log(x); }  //42 42 42 3次
 	)
-```	
+```
 ---
 ####Rx.Observable.doWhile(x,y::Number)
 ####Rx.Observable.while(true||false,y::stream)
@@ -219,7 +220,7 @@ Rx.Observable.while(
 	.subscribe(
 	    (x) => { console.log(x); }   //42  42   42
 	)
-```	
+```
 ---
 ##Transforming Observables
 ####Rx.Observable.XXXXX().selectMany(f())
@@ -243,7 +244,7 @@ Rx.Observable.of(1)
     ).subscribe((x) => {
         console.log(x);  //2 2
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().flatMapLatest()
 **过滤流,返回最后一个**
@@ -256,7 +257,7 @@ Rx.Observable
     }).subscribe((x) => {
         console.log(x);    // 1   2   3
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().flatMapObserver()
 **让可以监听状态,去响应onNext,onError,onCompleted**
@@ -275,7 +276,7 @@ Rx.Observable.range(1, 3)
     }).subscribe((x) => {
         console.log(x);   //  2 3 3
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().groupBy(f()[,f()[,f()]])
 **意如其名,分类用,第一个函数是用来返回分类的key,第二个函数用来返回返回的值,传说中的第三个,我也不知道干嘛用的.官方文档说是用来比较2各key值,但尝试后无果**
@@ -284,8 +285,8 @@ Rx.Observable.range(1, 3)
 
 ```javascript
 let codes = [
-    { keyCode: 38,tail:1 }, 
-    { keyCode: 38,tail:1 }, 
+    { keyCode: 38,tail:1 },
+    { keyCode: 38,tail:1 },
     { keyCode: 40,tail:2 },
     { keyCode: 40,tail:2 },
     { keyCode: 37,tail:3 },
@@ -304,19 +305,19 @@ Rx.Observable.fromArray(codes)
             console.log(x);  //返回返回值
         });
     });
-    
+
 Rx.Observable
     .for(codes, function (x) { return Rx.Observable.return(x).delay(1000); })
     .groupByUntil(
         function (x) { return x.keyCode; },
         function (x) { return x.keyCode; },
-        function (x) { return Rx.Observable.timer(2000); })    
+        function (x) { return Rx.Observable.timer(2000); })
 	 .subscribe((x) => {
          x.subscribe(function (x) {
              console.log(x);
          });
      });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().map()
 ####Rx.Observable.XXXXX().select()
@@ -337,7 +338,7 @@ let source = Rx.Observable.range(1, 3)
     }).subscribe((x) => {
         console.log(x); //1  4   9
     });
-```	
+```
 ---
 
 ####Rx.Observable.XXXXX().pluck()
@@ -353,7 +354,7 @@ let source = Rx.Observable.fromArray([
             .subscribe((x) => {
                 console.log(x); //0  1   2
             });
-```	
+```
 ---
 
 ####Rx.Observable.XXXXX().scan(f()[,init])
@@ -367,7 +368,7 @@ let source = Rx.Observable.range(1, 3)
     }).subscribe((x) => {
         console.log(x); //1  3   6
     });
-```	
+```
 ---
 
 ####Rx.Observable.XXXXX().expand(f())
@@ -380,7 +381,7 @@ let source = Rx.Observable.return(34)
     }).take(5).subscribe((x) => {
         console.log(x); //34  68   102 136   170
     });
-```	
+```
 ---
 ##Filtering Observables
 
@@ -405,7 +406,7 @@ Rx.Observable.range(1, 5)
     .takeWhile(function (x) { return x < 3; }).subscribe(
     	(x) => console.log(x) // 1 2
     )
-```	
+```
 ---
 ####Rx.Observable.XXXXX().takeUntilWithTime(x::Number)
 **限定时间外的流**
@@ -416,7 +417,7 @@ Rx.Observable.timer(0, 1000)
     .subscribe((x) => {
         console.log(x);  //0 1 2 3
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().takeLast(x::Number)
 **只返回倒算的x个流**
@@ -427,7 +428,7 @@ Rx.Observable.range(0, 5)
     .subscribe((x) => {
         console.log(x);  //2  3  4
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().takeLastWithTime(x::Number)
 **只返回倒算限定时间内的流**
@@ -439,7 +440,7 @@ Rx.Observable.timer(0,1000)
     .subscribe((x) => {
         console.log(x);  //5 6 7 8 9
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().takeLastBuffer(x::Number)
 **将倒数的x个流合并返回**
@@ -450,7 +451,7 @@ Rx.Observable.range(0, 5)
     .subscribe((x) => {
         console.log(x); //[2,3,4]
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().takeLastBufferWithTime(x::Number)
 **将倒数时间x内的流合并返回**
@@ -462,7 +463,7 @@ Rx.Observable.timer(0, 400)
     .subscribe((x) => {
         console.log(x);  //[8,9]
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().debounce(x::Number)
 **过滤间隔时间X内的多个事件,以最后一个为准**
@@ -476,7 +477,7 @@ let source = Rx.Observable.fromEvent(this.refs['refresh-btn'],'click',()=>{
     .debounce(500).subscribe((x) => {
         console.log(x);
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX(). throttleWithSelector(x::Number)
 **过滤间隔时间X内的多个事件,以最后一个为准**
@@ -490,7 +491,7 @@ let source = Rx.Observable.fromEvent(this.refs['refresh-btn'],'click',()=>{
     .debounce(500).subscribe((x) => {
         console.log(x);
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().distinct([,f()])
 **过滤相同的流**
@@ -503,7 +504,7 @@ Rx.Observable.fromArray([
     .subscribe((x) => {
         console.log(x);  //42 24
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().distinctUntilChanged()
 **过滤相同的流,但是只在触发的时候过滤**
@@ -516,7 +517,7 @@ Rx.Observable.fromArray([
     .subscribe((x) => {
         console.log(x); //42  24  42
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().elementAt(x:Number)
 **过滤其他的流,只返回第x个**
@@ -526,7 +527,7 @@ Rx.Observable.fromArray([0,1,2,3,4,5,6])
     .elementAt(3).subscribe((x) => {
         console.log(x);     //3
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().filter(f())
 **过滤回调里面返回false的值,保留返回true的,回调里有3个参数,当前值,当前的序列号,流对象自身(filter和where异曲同工,一个尿性)**
@@ -538,7 +539,7 @@ Rx.Observable.range(0, 5)
     }).subscribe((x) => {
         console.log(x); // 0  2  4
     });
-```	
+```
 ---
 ####Rx.Observable.every(f(x))
 **遍历所有,返回`true`||`false`**
@@ -562,8 +563,8 @@ let source = Rx.Observable.of(1,'b','2',4)
         (x) => { console.log(x); //true
         }
     );
-    
-    
+
+
 let source = Rx.Observable.of(1,'b','2',4)
     .findIndex((item)=>{
         return item == 'b';
@@ -586,7 +587,7 @@ Rx.Observable.range(0, 10)
     }).subscribe((x) => {
         console.log(x); // first:1   last:9
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().ignoreElements()
 **忽略所有的返回**
@@ -597,7 +598,7 @@ Rx.Observable.range(0, 5)
     .subscribe((x) => {
         console.log(x); //啥都没有
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().sample(x)
 **间隔x秒返回最新的一个流.与`debounce `的区别在于,`debounce `是每次触发重新计时.这里还有个小坑,x设为5999也是以5秒计算**
@@ -609,7 +610,7 @@ Rx.Observable.interval(1000)
     .subscribe((x) => {
         console.log(x);  //4   9
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().skip(x)
 **忽略前面x个流**
@@ -622,13 +623,13 @@ Rx.Observable.range(0, 10)
     .subscribe((x) => {
         console.log(x);  // 4 5 6 7 8 9
     });
-    
+
 Rx.Observable.range(0, 7)
     .skipLast(3)
     .subscribe((x) => {
         console.log(x);  // 0 1 2 3
     });
-```	
+```
 ---
 ####Rx.Observable.XXXXX().skipUntil(x::stream)
 **根据x流返回值,来跳过**
@@ -643,30 +644,30 @@ Rx.Observable.timer(0, 1000)
     .skipUntil(Rx.Observable.timer(5000)).subscribe(
     	(x) => console.log(x)
     )
-            
+
 Rx.Observable.range(1, 5)
     .skipWhile(function (x) { return x < 3; }).subscribe(
         (x) => console.log(x)   //3  4  5
     )
-            
+
 Rx.Observable.timer(0, 1000)
     .skipUntilWithTime(4000).subscribe((x) => {
         console.log(x);  //4 5 6 7 8 9 ...
     });
-    
+
 Rx.Observable.timer(0, 1000)
     .take(10)
     .skipLastWithTime(5000)
     .subscribe((x) => {
         console.log(x); // 0 1 2 3 4
     });
-```	
+```
 ---
 
 ##Combining Observables
 
 ####Rx.Observable.combineLatest(x::steam,y::steam,f(xv,yv))
-    
+
 **返回2个流各自最新的值(流有返回的时候触发,第一次必须2个流都有返回)**
 
 ```javascript
@@ -686,7 +687,7 @@ combined.subscribe((comb) => console.log(comb));
 ```
 ---
 ####y::steam.withLatestFrom(x::steam,f(xv,yv))
-    
+
 **当每次x流有返回值的时候,就是返回x流的当前值和y流的最后的返回值**
 
 ```javascript
@@ -723,7 +724,7 @@ xs.join(
     function (x, y) { return x +':'+ y; }
     )
     .take(5).subscribe((x) => {
-        console.log(x); //0:0  1:1 2:2 3:3 4:4 
+        console.log(x); //0:0  1:1 2:2 3:3 4:4
     });
 ```
 ---
@@ -795,8 +796,8 @@ Rx.Observable.forkJoin(
 ).subscribe(
     (x) => console.log(x)  //[1,9,4]
     )
-    
-    
+
+
 Rx.Observable.timer(0,2000).take(2).forkJoin(
     Rx.Observable.fromArray([1, 2, 3, 4]),
     (x,y)=> {
@@ -817,7 +818,7 @@ Rx.Observable.timer(0,2000).take(2).forkJoin(
 Rx.Observable.just(1).delay(3000).subscribe(
 		(x) => console.log(x)  //3s后输出  1
 )
-```	
+```
 ---
 
 ####Rx.Observable.XXXXX().do(f(),f(),f())
@@ -834,7 +835,7 @@ Rx.Observable.range(0, 3)
     ).subscribe(
         (x) => console.log(x)  //do:0  0  do:1  1  do:2  2
     )
-```	
+```
 ---
 
 ####Rx.Observable.XXXXX().doOnNext(f(),x::object)
@@ -848,7 +849,7 @@ Rx.Observable.range(0, 3)
     ).subscribe(
         (x) => console.log(x)  //do:0  0  do:1  1  do:2  2
     )
-```	
+```
 ---
 
 ####Rx.Observable.XXXXX().doOnError(f(),x::object)
@@ -867,7 +868,7 @@ Rx.Observable.throw(new Error())
         (err)=>{ console.log('Error: ' + err); },
         ()=>{ console.log('Completed'); }
     )
-    
+
 Rx.Observable.throw(new Error())
     .finally(function () {
         console.log('Finally');
@@ -876,7 +877,7 @@ Rx.Observable.throw(new Error())
         (err)=>{ console.log('Error: ' + err); },
         ()=>{ console.log('Completed'); }
     )
-    
+
 Rx.Observable.range(0,3)
     .doOnCompleted(function () {
         this.log('do');
@@ -885,7 +886,7 @@ Rx.Observable.range(0,3)
         (err)=>{ console.log('Error: ' + err); },
         ()=>{ console.log('Completed'); }
     )
-```	
+```
 ---
 ####Rx.Observable.XXXXX().skipUntilWithTime(x)
 **忽略前面x秒的流**
@@ -895,14 +896,14 @@ Rx.Observable.timer(0, 1000)
     .skipUntilWithTime(4000).subscribe((x) => {
         console.log(x);  //4 5 6 7 8 9 ...
     });
-    
+
 Rx.Observable.timer(0, 1000)
     .take(10)
     .skipLastWithTime(5000)
     .subscribe((x) => {
         console.log(x); // 0 1 2 3 4
     });
-```	
+```
 ---
 
 ##From Observables
@@ -1043,7 +1044,7 @@ x.sequenceEqual(y).subscribe(
 ##Mathematical and Aggregate Operators
 
 ####Rx.Observable.xxxxx.average()
-    
+
 **求所有返回值的平均数,可以有一个参数,用来打包处理每一个返回值**
 
 ```JavaScript
@@ -1054,7 +1055,7 @@ Rx.Observable.range(0, 9).average().subscribe(
 ---
 
 ####Rx.Observable.concat(x::stream)
-    
+
 **把x的返回添加到调用者的返回后面**
 
 ```JavaScript
@@ -1067,7 +1068,7 @@ x.concat(y).subscribe(
 ---
 
 ####Rx.Observable.xxxx.count(f())
-    
+
 **根据断言f的返回值,统计个数**
 
 ```JavaScript
@@ -1096,7 +1097,7 @@ Rx.Observable.of(1,2,3,4,5,1,3).max()
 	.subscribe(
     	(x) => console.log(x) // 5
 	)
-	
+
 Rx.Observable.of(1,2,3,4,5,5,3).maxBy((y)=>{
     return y;
 }).subscribe(
@@ -1111,11 +1112,11 @@ Rx.Observable.of(1,2,3,4,5,6,7,8,9).sum().subscribe(
 
 
 ####Rx.Observable.reduce(f(x,y))
-    
+
 **与[Array.prototype.reduce()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)功能一样**
 
 ```JavaScript
-let source = Rx.Observable.range(0,4).reduce((x,y)=>{  
+let source = Rx.Observable.range(0,4).reduce((x,y)=>{
                          //range:从0开始输出4个数 这里即输出0,1,2,3
     console.log(x,y);  0,1   1,2   3,3
     return x+y;         1     3     6
@@ -1158,7 +1159,7 @@ let published3 = source.share();//等同于上行
 
 published.subscribe(createObserver('SourceA'));
 published2.subscribe(createObserver('SourceB'));//不需要connect
-    
+
 function createObserver(tag) {
     return Rx.Observer.create(
         function (x) { console.log('Next: ' + tag + x); },
