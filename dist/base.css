@@ -3,3 +3,6 @@
   height: 400px;
   background-color: #f0f0f0;
 }
+.stylus__slide-left___JZXsY {
+  transition: margin-left 1s ease;
+}
