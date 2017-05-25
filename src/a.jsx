@@ -19,30 +19,50 @@ class A extends Component {
     }
   }
   componentDidMount() {
-    const inp = Observable.fromEvent(this.refs.ip, 'keydown')
-      // .filter((e) => {
-      //   return e.keyCode === 13;
-      // })
-      .map((e) => {
-        console.log(e, 'map');
-        return this.refs.ip.value
-      })
+    const enter = Observable.fromEvent(this.refs.ipt, 'keydown')
       .filter((e) => {
-        console.log(e, 'filter');
-        return e !== ''
+        return e.keyCode === 13;
+      })
+    const click = Observable.fromEvent(this.refs.btn, 'click');
+
+    const input = enter.merge(click);
+
+    input.map(() => {
+      return this.refs.ipt.value
+    })
+      .map((e) => {
+        return `<p>${e}</p>`
       })
       .do((e) => {
-        console.log(e, 'do');
+        document.querySelector('.fuck').innerHTML = e;
+        this.refs.ipt.value = '';
+      })
+      .mergeMap((e) => {
+        return Observable.fromEvent(e, 'click').filter((ee) => {
+          return ee.target === e
+        }).mapTo(e)
+      })
+      .do((e) => {
+        console.log('last', e);
       })
       .subscribe();
+    const fuck = 11;
+    const shit = 22;
+    function test({
+      fuck2 = fuck,
+      shit2 = shit
+      } = {}) {
+
+    }
   }
   render() {
     const { self } = this.state;
     return (
-      <div ref='a' className={cx('box')}>
+      <div ref='a' className={cx('box', 'slide-left')}>
         {self}
         <B />
-        <input type="text" ref='ip' />
+        <input type="text" ref='ipt' />
+        <button ref='btn'>add</button>
       </div>
     );
   }
